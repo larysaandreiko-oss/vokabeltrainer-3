@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lektion 3 — Auswahl Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2b2b26;
+    --ink-soft:#5a5a4f;
+    --paper:#f7f3ea;
+    --paper-raised:#fffdf8;
+    --sage:#7c9473;
+    --sage-deep:#5c7452;
+    --gold:#c9a227;
+    --red:#b6432c;
+    --line:#ddd6c4;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Source Sans 3', sans-serif;
+    line-height:1.55;
+    padding:0 0 60px 0;
+  }
+  header{
+    padding:38px 24px 22px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background:var(--paper-raised);
+  }
+  header .kicker{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.08em;
+    color:var(--sage-deep);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:2rem;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:0.98rem;
+  }
+  nav{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    flex-wrap:wrap;
+    margin:26px auto 0;
+    max-width:720px;
+    padding:0 16px;
+  }
+  nav button{
+    font-family:'Source Sans 3', sans-serif;
+    font-weight:600;
+    font-size:0.92rem;
+    padding:10px 18px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  nav button:hover{border-color:var(--sage);}
+  nav button.active{
+    background:var(--ink);
+    color:var(--paper);
+    border-color:var(--ink);
+  }
+  main{
+    max-width:760px;
+    margin:0 auto;
+    padding:34px 20px 0;
+  }
+  section.panel{display:none;}
+  section.panel.active{display:block;}
+  .panel-intro{
+    font-size:0.95rem;
+    color:var(--ink-soft);
+    margin-bottom:22px;
+    padding-bottom:16px;
+    border-bottom:1px dashed var(--line);
+  }
+  .panel-intro b{color:var(--ink);}
+
+  /* MATCHING */
+  .match-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 18px;
+  }
+  .match-col h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1rem;
+    margin:0 0 10px;
+    color:var(--sage-deep);
+  }
+  .match-item{
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:10px 12px;
+    margin-bottom:8px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--paper-raised);
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.86rem;
+    cursor:pointer;
+    transition:all .12s;
+  }
+  .match-col.ukr .match-item{font-family:'Source Sans 3', sans-serif; font-size:0.92rem;}
+  .match-item.selected{border-color:var(--gold); background:#fbf3d9;}
+  .match-item.matched{border-color:var(--sage); background:#eaf1e6; color:var(--sage-deep); cursor:default;}
+  .match-item.wrong-flash{border-color:var(--red); background:#f7e4de;}
+  .match-item[disabled]{cursor:default;}
+
+  /* GENERIC EXERCISE ITEM */
+  .item{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--paper-raised);
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+  .item .sent{
+    font-size:1rem;
+    margin-bottom:8px;
+  }
+  .item input[type=text]{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.92rem;
+    padding:7px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    width:210px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .item input[type=text]:focus{outline:none; border-color:var(--sage);}
+  .item .hint{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    margin-left:8px;
+  }
+  .item .fb{
+    margin-top:8px;
+    font-size:0.85rem;
+    font-weight:600;
+    display:none;
+  }
+  .item.correct{border-color:var(--sage);}
+  .item.correct .fb{display:block; color:var(--sage-deep);}
+  .item.incorrect{border-color:var(--red);}
+  .item.incorrect .fb{display:block; color:var(--red);}
+
+  .wordbank{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 20px;
+    padding:14px;
+    background:#eef0e8;
+    border-radius:var(--radius);
+  }
+  .wordbank span{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.82rem;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    padding:4px 10px;
+    border-radius:999px;
+    color:var(--sage-deep);
+  }
+
+  /* STORY */
+  .story-text{
+    font-size:1.03rem;
+    line-height:2.15;
+  }
+  .story-text input[type=text]{width:140px;}
+
+  /* DIALOGUES */
+  .dialogue{margin-bottom:26px;}
+  .dialogue h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.05rem;
+    margin:0 0 12px;
+    color:var(--ink);
+  }
+  .turn{
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+    align-items:flex-start;
+  }
+  .turn .speaker{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    color:var(--gold);
+    font-weight:600;
+    width:26px;
+    flex-shrink:0;
+    padding-top:2px;
+  }
+  .turn .bubble{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:10px 14px;
+    flex:1;
+  }
+  .turn.ukr .bubble{background:#f0eee2; font-style:italic; color:var(--ink-soft);}
+
+  .actions{
+    display:flex;
+    gap:10px;
+    margin:18px 0 28px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  button.check-btn, button.reset-btn{
+    font-family:'Source Sans 3', sans-serif;
+    font-weight:600;
+    font-size:0.92rem;
+    padding:11px 22px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+  }
+  button.check-btn{background:var(--ink); color:var(--paper);}
+  button.check-btn:hover{background:var(--sage-deep);}
+  button.reset-btn{background:transparent; color:var(--ink-soft); border:1px solid var(--line);}
+  button.reset-btn:hover{border-color:var(--red); color:var(--red);}
+  .score{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.88rem;
+    color:var(--ink-soft);
+  }
+  .score b{color:var(--ink);}
+  footer{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.8rem;
+    margin-top:40px;
+    padding:0 20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">SICHER! C1 · LEKTION 3</div>
+  <h1>Auswahl-Trainer</h1>
+  <p>Чотири вправи на 25 обраних слів із Lektion 3</p>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="match">Зіставлення</button>
+  <button class="tab-btn" data-tab="gap">Заповни пропуски</button>
+  <button class="tab-btn" data-tab="story">Історія</button>
+  <button class="tab-btn" data-tab="dialog">Діалоги</button>
+</nav>
+
+<main>
+
+  <!-- MATCHING -->
+  <section class="panel active" id="panel-match">
+    <div class="panel-intro">Клікни на німецьке слово, потім на його переклад. Правильна пара підсвітиться зеленим, неправильна — коротко почервоніє.</div>
+    <div class="match-grid">
+      <div class="match-col de"><h3>Deutsch</h3><div id="match-de"></div></div>
+      <div class="match-col ukr"><h3>Переклад</h3><div id="match-ukr"></div></div>
+    </div>
+    <div class="actions">
+      <button class="reset-btn" onclick="resetMatch()">Почати заново</button>
+      <span class="score" id="match-score">Знайдено: <b>0</b> / 14</span>
+    </div>
+  </section>
+
+  <!-- GAP FILL -->
+  <section class="panel" id="panel-gap">
+    <div class="panel-intro">Вибери потрібне слово чи вираз зі списку і встав його у правильній формі. Натисни <b>«Перевірити»</b>, щоб побачити результат.</div>
+    <div class="wordbank" id="gap-bank"></div>
+    <div id="gap-items"></div>
+    <div class="actions">
+      <button class="check-btn" onclick="checkGap()">Перевірити</button>
+      <button class="reset-btn" onclick="resetGap()">Скинути</button>
+      <span class="score" id="gap-score"></span>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="panel" id="panel-story">
+    <div class="panel-intro">Прочитай історію про Мію та встав пропущені слова. Перша літера кожного слова дана як підказка.</div>
+    <div class="story-text" id="story-text"></div>
+    <div class="actions">
+      <button class="check-btn" onclick="checkStory()">Перевірити</button>
+      <button class="reset-btn" onclick="resetStory()">Скинути</button>
+      <span class="score" id="story-score"></span>
+    </div>
+  </section>
+
+  <!-- DIALOGUES -->
+  <section class="panel" id="panel-dialog">
+    <div class="panel-intro">Репліки українською показують контекст. Заповни німецькі репліки потрібним словом чи виразом зі списку Lektion 3.</div>
+    <div id="dialog-container"></div>
+    <div class="actions">
+      <button class="check-btn" onclick="checkDialog()">Перевірити</button>
+      <button class="reset-btn" onclick="resetDialog()">Скинути</button>
+      <span class="score" id="dialog-score"></span>
+    </div>
+  </section>
+
+</main>
+
+<footer>Lektion 3 · Sicher! C1 — 25 обраних слів</footer>
+
+<script>
+/* ---------- normalize helper: forgiving comparison ---------- */
+function norm(s){
+  return s.trim().toLowerCase()
+    .replace(/ß/g,'ss')
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
+    .replace(/\s+/g,' ');
+}
+function isCorrect(input, answers){
+  const n = norm(input);
+  return answers.some(a => norm(a) === n);
+}
+
+/* =========================================================
+   TAB SWITCHING
+   ========================================================= */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* =========================================================
+   1. MATCHING
+   ========================================================= */
+const matchPairs = [
+  {de:"der Bauer", ukr:"селянин, фермер"},
+  {de:"die Fähigkeit", ukr:"здатність"},
+  {de:"die Geschicklichkeit", ukr:"вправність, спритність"},
+  {de:"der Siedler", ukr:"поселенець"},
+  {de:"die Kapazität", ukr:"здатність, потужність"},
+  {de:"die Verfügbarkeit", ukr:"доступність"},
+  {de:"beeindrucken", ukr:"вражати"},
+  {de:"ausgeprägt", ukr:"яскраво виражений"},
+  {de:"schlau", ukr:"хитрий, кмітливий"},
+  {de:"allmählich", ukr:"поступовий"},
+  {de:"lediglich", ukr:"лише, тільки"},
+  {de:"hingegen", ukr:"натомість"},
+  {de:"der Reiz", ukr:"подразник; привабливість"},
+  {de:"aufwendig", ukr:"трудомісткий, витратний"},
+];
+let matchState = {selectedDe:null, selectedUkr:null, matched:0};
+
+function shuffled(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function renderMatch(){
+  const deCol = document.getElementById('match-de');
+  const ukrCol = document.getElementById('match-ukr');
+  deCol.innerHTML=''; ukrCol.innerHTML='';
+  const deOrder = shuffled(matchPairs.map((p,i)=>i));
+  const ukrOrder = shuffled(matchPairs.map((p,i)=>i));
+  deOrder.forEach(i=>{
+    const b = document.createElement('button');
+    b.className='match-item'; b.textContent=matchPairs[i].de; b.dataset.idx=i;
+    b.onclick = ()=>selectMatch('de', i, b);
+    deCol.appendChild(b);
+  });
+  ukrOrder.forEach(i=>{
+    const b = document.createElement('button');
+    b.className='match-item'; b.textContent=matchPairs[i].ukr; b.dataset.idx=i;
+    b.onclick = ()=>selectMatch('ukr', i, b);
+    ukrCol.appendChild(b);
+  });
+  matchState = {selectedDe:null, selectedUkr:null, matched:0};
+  updateMatchScore();
+}
+
+function selectMatch(side, idx, el){
+  if(el.classList.contains('matched')) return;
+  if(side==='de'){
+    document.querySelectorAll('#match-de .match-item').forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
+    matchState.selectedDe = {idx, el};
+  } else {
+    document.querySelectorAll('#match-ukr .match-item').forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
+    matchState.selectedUkr = {idx, el};
+  }
+  if(matchState.selectedDe && matchState.selectedUkr){
+    if(matchState.selectedDe.idx === matchState.selectedUkr.idx){
+      matchState.selectedDe.el.classList.remove('selected');
+      matchState.selectedUkr.el.classList.remove('selected');
+      matchState.selectedDe.el.classList.add('matched');
+      matchState.selectedUkr.el.classList.add('matched');
+      matchState.selectedDe.el.disabled = true;
+      matchState.selectedUkr.el.disabled = true;
+      matchState.matched++;
+      updateMatchScore();
+      matchState.selectedDe = null;
+      matchState.selectedUkr = null;
+    } else {
+      const de = matchState.selectedDe.el, ukr = matchState.selectedUkr.el;
+      de.classList.add('wrong-flash'); ukr.classList.add('wrong-flash');
+      setTimeout(()=>{
+        de.classList.remove('selected','wrong-flash');
+        ukr.classList.remove('selected','wrong-flash');
+      }, 500);
+      matchState.selectedDe = null;
+      matchState.selectedUkr = null;
+    }
+  }
+}
+function updateMatchScore(){
+  document.getElementById('match-score').innerHTML = `Знайдено: <b>${matchState.matched}</b> / ${matchPairs.length}`;
+}
+function resetMatch(){ renderMatch(); }
+renderMatch();
+
+/* =========================================================
+   2. GAP FILL
+   ========================================================= */
+const gapBankWords = ["abhängen von","einstellen","entgegenstehen","abwärtsgehen","imstande sein",
+  "fördern","sich sträuben","versäumen","jemanden vertraut machen mit","neulich",
+  "einen Standpunkt vertreten","von Vorteil sein"];
+
+const gapItems = [
+  {sent:"Ob das Projekt gelingt, ___ stark vom Budget ___.", answers:["hängt ab"], note:"abhängen von — залежати від"},
+  {sent:"Die Firma musste den Betrieb wegen Personalmangels ___.", answers:["einstellen"], note:"einstellen — припиняти"},
+  {sent:"Alte Vorurteile schienen der Zusammenarbeit immer wieder zu ___.", answers:["entgegenstehen"], note:"entgegenstehen — стояти на заваді"},
+  {sent:"Nach der Kündigung schien es mit seiner Karriere nur noch ___ zu gehen.", answers:["abwärts"], note:"abwärtsgehen — йти на спад"},
+  {sent:"Nach dem Kurs war sie endlich ___, das Programm selbst zu bedienen.", answers:["imstande"], note:"imstande sein — бути здатним"},
+  {sent:"Das Stipendium soll besonders begabte Studierende ___.", answers:["fördern"], note:"fördern — сприяти"},
+  {sent:"Zuerst wollte er sich gegen die neue Regel ___.", answers:["sträuben"], note:"sich sträuben — опиратися"},
+  {sent:"Sie wollte diese einmalige Chance auf keinen Fall ___.", answers:["versäumen"], note:"versäumen — прогаяти, упустити"},
+  {sent:"Der Mentor sollte die neuen Mitarbeiter mit den Abläufen im Büro ___.", answers:["vertraut machen"], note:"jemanden vertraut machen mit — ознайомити когось із чимось"},
+  {sent:"___ habe ich sie zufällig in der Stadt getroffen.", answers:["Neulich","neulich"], note:"neulich — нещодавно"},
+  {sent:"In der Diskussion konnte er seinen ___ souverän vertreten.", answers:["Standpunkt"], note:"einen Standpunkt vertreten — відстоювати точку зору"},
+  {sent:"Zusätzliche Erfahrung im Ausland kann für die Bewerbung sehr ___ sein.", answers:["von Vorteil"], note:"von Vorteil sein — бути перевагою"},
+];
+
+function renderGap(){
+  const bank = document.getElementById('gap-bank');
+  bank.innerHTML = gapBankWords.map(w=>`<span>${w}</span>`).join('');
+  const container = document.getElementById('gap-items');
+  container.innerHTML = gapItems.map((it,i)=>{
+    let sentHtml = it.sent;
+    const blankCount = (sentHtml.match(/___/g) || []).length;
+    if(blankCount === 1){
+      sentHtml = sentHtml.replace('___', `<input type="text" id="gap-input-${i}" autocomplete="off">`);
+    } else {
+      // two-part separable verb sentence: single combined input covers both blanks conceptually
+      sentHtml = sentHtml.replace('___', `<input type="text" id="gap-input-${i}" autocomplete="off">`).replace('___', '');
+    }
+    return `
+    <div class="item" id="gap-item-${i}">
+      <div class="sent">${i+1}. ${sentHtml}</div>
+      <div class="fb" id="gap-fb-${i}"></div>
+    </div>`;
+  }).join('');
+  document.getElementById('gap-score').textContent = '';
+}
+function checkGap(){
+  let correctCount = 0;
+  gapItems.forEach((it,i)=>{
+    const input = document.getElementById(`gap-input-${i}`);
+    const itemEl = document.getElementById(`gap-item-${i}`);
+    const fb = document.getElementById(`gap-fb-${i}`);
+    const ok = isCorrect(input.value, it.answers);
+    itemEl.classList.remove('correct','incorrect');
+    if(ok){
+      itemEl.classList.add('correct');
+      fb.textContent = '✓ Правильно — ' + it.note;
+      correctCount++;
+    } else {
+      itemEl.classList.add('incorrect');
+      fb.textContent = '✗ Правильна відповідь: ' + it.answers[0] + ' (' + it.note + ')';
+    }
+  });
+  document.getElementById('gap-score').innerHTML = `Результат: <b>${correctCount}</b> / ${gapItems.length}`;
+}
+function resetGap(){ renderGap(); }
+renderGap();
+
+/* =========================================================
+   3. STORY
+   ========================================================= */
+const storyBlanks = [
+  {answers:["Fähigkeit"], hint:"F"},
+  {answers:["Geschicklichkeit"], hint:"G"},
+  {answers:["Siedlerin","Siedler"], hint:"S"},
+  {answers:["Kapazität"], hint:"K"},
+  {answers:["Verfügbarkeit"], hint:"V"},
+  {answers:["abzuhängen","abhängen"], hint:"a"},
+  {answers:["beeindrucken"], hint:"b"},
+  {answers:["einstellen"], hint:"e"},
+  {answers:["entgegenzustehen","entgegenstehen"], hint:"e"},
+  {answers:["abwärtszugehen","abwärtsgehen","abwärts"], hint:"a"},
+  {answers:["imstande","imstande sein"], hint:"i"},
+  {answers:["ausgeprägt"], hint:"a"},
+  {answers:["schlau"], hint:"s"},
+  {answers:["Allmählich","allmählich"], hint:"A"},
+  {answers:["lediglich"], hint:"l"},
+  {answers:["hingegen"], hint:"h"},
+  {answers:["Reiz"], hint:"R"},
+  {answers:["fördern"], hint:"f"},
+  {answers:["sträuben"], hint:"s"},
+  {answers:["versäumen"], hint:"v"},
+  {answers:["Neulich","neulich"], hint:"N"},
+  {answers:["von Vorteil","von Vorteil sein"], hint:"v"},
+  {answers:["ihren Standpunkt vertreten","einen Standpunkt vertreten","Standpunkt vertreten"], hint:"i"},
+  {answers:["vertraut machen","vertraut zu machen"], hint:"v"},
+  {answers:["aufwendig"], hint:"a"},
+];
+
+const storyTemplate = [
+"Mia hatte schon immer eine besondere ",
+0,
+" für Sprachen. Mit ihrer ",
+1,
+" im Umgang mit Menschen fiel es ihr leicht, neue Kontakte zu knüpfen. Als sie beschloss, für ein Jahr nach Kanada zu ziehen, fühlte sie sich fast wie eine moderne ",
+2,
+" — bereit, ein neues Leben aufzubauen. Die ",
+3,
+" des kleinen Dorfes, in dem sie wohnen sollte, war begrenzt, und auch die ",
+4,
+" von Wohnungen war gering. Ob sie überhaupt eine Bleibe finden würde, schien völlig vom Zufall ",
+5,
+". Schon in der ersten Woche konnte sie ihre neuen Nachbarn mit ihrer Offenheit ",
+6,
+". Doch nicht alles lief glatt: Ihr Arbeitgeber musste das Projekt nach zwei Monaten plötzlich ",
+7,
+", weil das Budget fehlte. Bürokratische Hürden schienen ihr immer wieder ",
+8,
+". Eine Zeit lang schien es mit ihren Finanzen sogar richtig ",
+9,
+". Trotzdem war Mia ",
+10,
+", ruhig zu bleiben und neue Wege zu suchen. Ihr Talent für Improvisation war besonders ",
+11,
+", und sie war klug genug — man könnte sagen ",
+12,
+" — um schnell eine Lösung zu finden. ",
+13,
+" besserte sich die Lage. Zunächst fand sie ",
+14,
+" einen kleinen Nebenjob, der aber zum Überleben reichte. Ihre Kollegin ",
+15,
+" hatte von Anfang an einen festen Vertrag. Für Mia lag der eigentliche ",
+16,
+" des Abenteuers nicht im Geld, sondern in der Erfahrung selbst. Ein lokales Programm sollte junge Migranten ",
+17,
+", und Mia bewarb sich sofort. Zuerst wollte sie sich gegen diese neue Herausforderung ",
+18,
+", doch schließlich überwand sie ihre Zweifel. Sie wollte keine einzige Gelegenheit mehr ",
+19,
+". ",
+20,
+" erzählte sie mir, dass die ganze Erfahrung sehr ",
+21,
+" für ihre Karriere gewesen sei. Heute kann sie überzeugend ",
+22,
+" und neue Kollegen leicht mit den lokalen Gepflogenheiten ",
+23,
+". Der ganze Prozess war zwar ",
+24,
+", aber es hat sich gelohnt."
+];
+
+function renderStory(){
+  let html = '';
+  storyTemplate.forEach(part=>{
+    if(typeof part === 'number'){
+      const b = storyBlanks[part];
+      html += `<input type="text" id="story-input-${part}" autocomplete="off"><span class="hint">(${b.hint}...)</span>`;
+    } else {
+      html += part;
+    }
+  });
+  document.getElementById('story-text').innerHTML = html;
+  document.getElementById('story-score').textContent = '';
+}
+function checkStory(){
+  let correctCount = 0;
+  storyBlanks.forEach((b,i)=>{
+    const input = document.getElementById(`story-input-${i}`);
+    const ok = isCorrect(input.value, b.answers);
+    input.style.borderColor = ok ? 'var(--sage)' : 'var(--red)';
+    input.style.background = ok ? '#eaf1e6' : '#f7e4de';
+    if(ok) correctCount++;
+  });
+  document.getElementById('story-score').innerHTML = `Результат: <b>${correctCount}</b> / ${storyBlanks.length}. Перевір форму слова, якщо десь помилка.`;
+}
+function resetStory(){ renderStory(); }
+renderStory();
+
+/* =========================================================
+   4. DIALOGUES (translanguaging)
+   ========================================================= */
+const dialogues = [
+  {
+    title:"Складний проєкт",
+    turns:[
+      {who:'ukr', speaker:'А', text:'Чому ти взагалі не хочеш братися за цей проєкт?'},
+      {who:'de', speaker:'Б', before:'Ehrlich gesagt, das Ganze scheint mir viel zu ', blank:0, after:' — ich habe kaum Zeit dafür.'},
+      {who:'ukr', speaker:'А', text:'Але кажуть, що це дуже вигідно для кар\'єри.'},
+      {who:'de', speaker:'Б', before:'Stimmt, es könnte wirklich sehr ', blank:1, after:' für meine weitere Entwicklung sein.'},
+      {who:'ukr', speaker:'А', text:'То ти взагалі здатен впоратися з таким навантаженням?'},
+      {who:'de', speaker:'Б', before:'Ich glaube schon, ich bin durchaus ', blank:2, after:', so ein Projekt zu leiten.'},
+      {who:'ukr', speaker:'А', text:'А чому тоді досі опираєшся цій ідеї?'},
+      {who:'de', speaker:'Б', before:'Keine Ahnung, irgendetwas in mir will sich einfach dagegen ', blank:3, after:'.'},
+    ],
+    blanks:[
+      {answers:["aufwendig"], note:"aufwendig — трудомісткий"},
+      {answers:["von Vorteil"], note:"von Vorteil sein — бути перевагою"},
+      {answers:["imstande"], note:"imstande sein — бути здатним"},
+      {answers:["sträuben"], note:"sich sträuben — опиратися"},
+    ]
+  },
+  {
+    title:"Переїзд подруги",
+    turns:[
+      {who:'ukr', speaker:'В', text:'Твоя подруга справді переїхала до Канади сама? Це ж було ризиковано.'},
+      {who:'de', speaker:'Г', before:'Ja, aber sie war schon immer ziemlich ', blank:0, after:' und hat alles gut durchdacht.'},
+      {who:'ukr', speaker:'В', text:'А місцеві мешканці добре її прийняли?'},
+      {who:'de', speaker:'Г', before:'Total — sie konnte alle mit ihrer Offenheit sofort ', blank:1, after:'.'},
+      {who:'ukr', speaker:'В', text:'А що її найбільше приваблювало в цій пригоді?'},
+      {who:'de', speaker:'Г', before:'Für sie lag der größte ', blank:2, after:' einfach in der neuen Erfahrung selbst.'},
+      {who:'ukr', speaker:'В', text:'А її брат, навпаки, взагалі не хотів кудись їхати?'},
+      {who:'de', speaker:'Г', before:'Genau, ihr Bruder ', blank:3, after:' wollte lieber zu Hause bleiben.'},
+    ],
+    blanks:[
+      {answers:["schlau"], note:"schlau — хитрий, кмітливий"},
+      {answers:["beeindrucken"], note:"beeindrucken — вражати"},
+      {answers:["Reiz"], note:"der Reiz — привабливість"},
+      {answers:["hingegen"], note:"hingegen — натомість"},
+    ]
+  }
+];
+
+function renderDialog(){
+  const container = document.getElementById('dialog-container');
+  container.innerHTML = dialogues.map((d, di)=>{
+    const turnsHtml = d.turns.map(t=>{
+      if(t.who === 'ukr'){
+        return `<div class="turn ukr"><div class="speaker">${t.speaker}</div><div class="bubble">${t.text}</div></div>`;
+      } else {
+        return `<div class="turn"><div class="speaker">${t.speaker}</div><div class="bubble">${t.before}<input type="text" id="dlg-${di}-${t.blank}" autocomplete="off">${t.after}</div></div>`;
+      }
+    }).join('');
+    return `<div class="dialogue" id="dialogue-${di}">
+      <h3>${d.title}</h3>
+      ${turnsHtml}
+      <div class="fb" id="dlg-fb-${di}" style="display:block;"></div>
+    </div>`;
+  }).join('');
+  document.getElementById('dialog-score').textContent = '';
+}
+
+function checkDialog(){
+  let total = 0, correct = 0;
+  dialogues.forEach((d, di)=>{
+    let dialogueCorrect = 0;
+    let notes = [];
+    d.blanks.forEach((b, bi)=>{
+      total++;
+      const input = document.getElementById(`dlg-${di}-${bi}`);
+      const ok = isCorrect(input.value, b.answers);
+      input.style.borderColor = ok ? 'var(--sage)' : 'var(--red)';
+      input.style.background = ok ? '#eaf1e6' : '#f7e4de';
+      if(ok){ correct++; dialogueCorrect++; }
+      else notes.push(`«${b.answers[0]}» (${b.note})`);
+    });
+    const fb = document.getElementById(`dlg-fb-${di}`);
+    if(notes.length === 0){
+      fb.innerHTML = `<span style="color:var(--sage-deep);">✓ Усі відповіді правильні (${dialogueCorrect}/${d.blanks.length})</span>`;
+    } else {
+      fb.innerHTML = `<span style="color:var(--red);">Результат: ${dialogueCorrect}/${d.blanks.length}. Правильно мало бути: ${notes.join(', ')}</span>`;
+    }
+  });
+  document.getElementById('dialog-score').innerHTML = `Загальний результат: <b>${correct}</b> / ${total}`;
+}
+function resetDialog(){ renderDialog(); }
+renderDialog();
+
+</script>
+</body>
+</html>
