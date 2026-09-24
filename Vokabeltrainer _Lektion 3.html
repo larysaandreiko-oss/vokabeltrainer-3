@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vokabeltrainer — Redewendungen &amp; Wortschatz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,500&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#242118; --paper:#faf6ee; --paper2:#f1ead9; --sage:#7c9070; --sage-d:#5c6f52;
+  --gold:#c99a3b; --red:#b3452e; --line:#d9cdb2; --muted:#6f6656;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ece6d8; --paper:#211d16; --paper2:#2b2519; --sage:#8fa682; --sage-d:#a9c19c;
+    --gold:#d9ad57; --red:#e0725a; --line:#463d2c; --muted:#b4a98c;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ece6d8; --paper:#211d16; --paper2:#2b2519; --sage:#8fa682; --sage-d:#a9c19c;
+  --gold:#d9ad57; --red:#e0725a; --line:#463d2c; --muted:#b4a98c;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Source Sans 3", system-ui, -apple-system, sans-serif;
+  line-height:1.55;
+}
+.wrap{max-width:900px; margin:0 auto; padding:28px 20px 60px;}
+h1{
+  font-family:"Fraunces", Georgia, serif; font-weight:700; font-size:2rem;
+  margin:0 0 4px; letter-spacing:-0.01em;
+}
+.subtitle{color:var(--muted); font-size:0.95rem; margin-bottom:22px;}
+.tabs{display:flex; gap:8px; flex-wrap:wrap; border-bottom:2px solid var(--line); margin-bottom:24px; padding-bottom:0;}
+.tab-btn{
+  font-family:"Source Sans 3", sans-serif; font-weight:600; font-size:0.92rem;
+  background:none; border:none; padding:10px 14px; cursor:pointer; color:var(--muted);
+  border-bottom:3px solid transparent; margin-bottom:-2px;
+}
+.tab-btn.active{color:var(--ink); border-bottom-color:var(--gold);}
+.tab-btn:hover{color:var(--ink);}
+section.panel{display:none;}
+section.panel.active{display:block;}
+h2{
+  font-family:"Fraunces", Georgia, serif; font-weight:600; font-style:italic;
+  font-size:1.4rem; margin:0 0 6px; color:var(--sage-d);
+}
+.instructions{color:var(--muted); font-size:0.9rem; margin-bottom:18px;}
+
+/* MATCHING - two columns */
+.match-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 28px; margin-bottom:16px;}
+.match-col-label{font-family:"Fraunces", serif; font-style:italic; color:var(--muted); font-size:0.85rem; margin-bottom:8px;}
+.match-item{
+  font-family:"JetBrains Mono", monospace; font-size:0.88rem; padding:10px 12px; margin-bottom:8px;
+  border:1px solid var(--line); border-radius:8px; background:var(--paper2); cursor:pointer;
+  display:flex; align-items:center; gap:8px; user-select:none;
+}
+.match-item.term{font-family:"JetBrains Mono", monospace;}
+.match-item.trans{font-family:"Source Sans 3", sans-serif; font-size:0.92rem;}
+.match-item:hover{border-color:var(--sage);}
+.match-item.selected{border-color:var(--gold); background:rgba(201,154,59,0.15);}
+.match-item.paired{border-style:solid;}
+.match-item.correct{border-color:var(--sage); background:rgba(124,144,112,0.18); color:var(--sage-d);}
+.match-item.wrong{border-color:var(--red); background:rgba(179,69,46,0.15); color:var(--red);}
+.badge{
+  display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+  border-radius:50%; background:var(--sage-d); color:var(--paper); font-size:0.7rem; font-weight:700;
+  flex-shrink:0;
+}
+
+.sentence-block{margin-bottom:18px; padding:12px 14px; background:var(--paper2); border-radius:8px; border:1px solid var(--line);}
+.sentence-text{font-size:1rem;}
+.hint{color:var(--muted); font-size:0.82rem; font-style:italic; margin-top:4px;}
+input.blank{
+  font-family:"JetBrains Mono", monospace; font-size:0.92rem; padding:3px 6px;
+  border:none; border-bottom:2px solid var(--sage); background:transparent; color:var(--ink);
+  width:150px; text-align:center;
+}
+input.blank:focus{outline:none; border-bottom-color:var(--gold);}
+input.blank.correct{border-bottom-color:var(--sage); background:rgba(124,144,112,0.15); color:var(--sage-d);}
+input.blank.wrong{border-bottom-color:var(--red); background:rgba(179,69,46,0.12); color:var(--red);}
+.story-text{font-size:1.04rem; line-height:2.1;}
+.story-text p{margin:0 0 16px;}
+.dialogue{margin-bottom:26px; padding:14px 16px; background:var(--paper2); border-radius:10px; border:1px solid var(--line);}
+.dialogue p{margin:7px 0;}
+.speaker{font-weight:600; color:var(--sage-d); font-family:"Fraunces", serif; font-style:italic;}
+button.check-btn{
+  font-family:"Source Sans 3", sans-serif; font-weight:700; font-size:0.9rem;
+  background:var(--gold); color:var(--paper); border:none; border-radius:20px;
+  padding:9px 22px; cursor:pointer; margin-top:6px;
+}
+button.check-btn:hover{background:var(--red);}
+.score{
+  font-family:"JetBrains Mono", monospace; font-size:0.88rem; margin-top:12px;
+  padding:8px 12px; border-radius:6px; background:var(--paper2); display:inline-block;
+  border:1px solid var(--line);
+}
+@media (max-width:600px){ .match-grid{grid-template-columns:1fr; gap:0;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vokabeltrainer</h1>
+  <div class="subtitle">32 Wörter &amp; Redewendungen · Zuordnung · Lückentext · Geschichte · Dialoge</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="match">Zuordnung</button>
+    <button class="tab-btn" data-tab="fib">Lückentext</button>
+    <button class="tab-btn" data-tab="story">Geschichte</button>
+    <button class="tab-btn" data-tab="dialogue">Dialoge</button>
+  </div>
+
+  <!-- MATCHING -->
+  <section class="panel active" id="panel-match">
+    <h2>Zuordnung</h2>
+    <p class="instructions">Klicke zuerst auf ein deutsches Wort links, dann auf die passende Übersetzung rechts. Ein Klick auf ein bereits verbundenes Paar löst es wieder.</p>
+    <div class="match-grid">
+      <div>
+        <div class="match-col-label">Deutsch</div>
+        <div id="match-terms"></div>
+      </div>
+      <div>
+        <div class="match-col-label">Übersetzung</div>
+        <div id="match-trans"></div>
+      </div>
+    </div>
+    <button class="check-btn" onclick="checkMatch()">Prüfen</button>
+    <div class="score" id="match-score"></div>
+  </section>
+
+  <!-- FILL IN THE BLANK -->
+  <section class="panel" id="panel-fib">
+    <h2>Lückentext</h2>
+    <p class="instructions">Setze das passende Wort in die Lücke ein.</p>
+    <div id="fib-container"></div>
+    <button class="check-btn" onclick="checkFib()">Prüfen</button>
+    <div class="score" id="fib-score"></div>
+  </section>
+
+  <!-- STORY -->
+  <section class="panel" id="panel-story">
+    <h2>Geschichte</h2>
+    <p class="instructions">Ergänze die Geschichte. Der erste Buchstabe steht als Hinweis im Feld.</p>
+    <div class="story-text" id="story-container"></div>
+    <button class="check-btn" onclick="checkStory()">Prüfen</button>
+    <div class="score" id="story-score"></div>
+  </section>
+
+  <!-- DIALOGUES -->
+  <section class="panel" id="panel-dialogue">
+    <h2>Dialoge (Translanguaging)</h2>
+    <p class="instructions">Ergänze die deutschen Wörter im russischsprachigen Dialog.</p>
+    <div id="dialogue-container"></div>
+    <button class="check-btn" onclick="checkDialogue()">Prüfen</button>
+    <div class="score" id="dialogue-score"></div>
+  </section>
+
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+const vocab = [
+ {de:"die Ausstattung, -en", ru:"обстановка, оснащение"},
+ {de:"die Durchsage, -n", ru:"объявление (по громкой связи)"},
+ {de:"die Verzögerung, -en", ru:"задержка"},
+ {de:"der Einsatz, ¨e", ru:"применение, использование"},
+ {de:"in der Lage sein", ru:"быть способным, в состоянии"},
+ {de:"angehend", ru:"будущий, начинающий"},
+ {de:"reizvoll", ru:"привлекательный"},
+ {de:"derzeit", ru:"в настоящее время"},
+ {de:"der Rücktritt, -e", ru:"отставка, уход"},
+ {de:"Ich bin der Ansicht .....", ru:"я считаю..., я придерживаюсь мнения"},
+ {de:"in Kauf nehmen", ru:"смириться с чем-то"},
+ {de:"zur Verfügung stehen", ru:"быть в распоряжении"},
+ {de:"zur Verfügung stellen", ru:"предоставлять в распоряжение"},
+ {de:"im Vordergrund stehen", ru:"быть на первом плане"},
+ {de:"es gilt, etwas zu tun", ru:"необходимо сделать что-то"},
+ {de:"pauschal", ru:"обобщённый, без деталей"},
+ {de:"auf eigene Faust", ru:"на свой страх и риск"},
+ {de:"eine Auswahl treffen", ru:"сделать выбор"},
+ {de:"eine Entscheidung treffen", ru:"принять решение"},
+ {de:"eine Initiative ergreifen", ru:"проявить инициативу"},
+ {de:"über Kenntnisse verfügen", ru:"обладать знаниями"},
+ {de:"Kritik üben an Dat", ru:"критиковать"},
+ {de:"Verantwortung übernehmen", ru:"брать на себя ответственность"},
+ {de:"der Bogen", ru:"лист бумаги"},
+ {de:"der Erzeuger", ru:"производитель"},
+ {de:"verwöhnen", ru:"баловать"},
+ {de:"hautnah", ru:"вживую, очень близко"},
+ {de:"das Andenken", ru:"сувенир, память"},
+ {de:"nachvollziehen", ru:"понять логику чего-то"},
+ {de:"jemandem etwas untersagen", ru:"запретить кому-то что-то"},
+ {de:"enorm", ru:"огромный"},
+ {de:"nachhaltig", ru:"устойчивый, долговременный"}
+];
+
+const fibData = [
+ {sentence:"Die {b} des Konferenzraums entspricht modernen Standards.", answers:["Ausstattung"], hint:"обстановка, оснащение"},
+ {sentence:"Ohne den {b} vieler Freiwilliger wäre das Projekt nicht möglich gewesen.", answers:["Einsatz"], hint:"применение, использование"},
+ {sentence:"Ein Auslandssemester ist für viele Studierende besonders {b}.", answers:["reizvoll"], hint:"привлекательный"},
+ {sentence:"Für den Traumjob war sie bereit, einen Umzug in eine andere Stadt in Kauf zu {b}.", answers:["nehmen"], hint:"in Kauf nehmen — смириться"},
+ {sentence:"Der Berater {b} den Kunden montags bis freitags zur Verfügung.", answers:["steht"], hint:"zur Verfügung stehen"},
+ {sentence:"Die Universität {b} den Studierenden kostenlose Lernmaterialien zur Verfügung.", answers:["stellt"], hint:"zur Verfügung stellen"},
+ {sentence:"Bei dieser Reform {b} der Umweltschutz im Vordergrund.", answers:["steht"], hint:"im Vordergrund stehen"},
+ {sentence:"Angesichts des Klimawandels {b} es, schnell zu handeln.", answers:["gilt"], hint:"es gilt, etwas zu tun"},
+ {sentence:"Kannst du mir bitte einen {b} Papier geben?", answers:["Bogen"], hint:"лист бумаги"},
+ {sentence:"Der {b} von Solarenergie profitiert von staatlichen Förderungen.", answers:["Erzeuger"], hint:"производитель"},
+ {sentence:"Die Schulordnung {b} den Schülern, während der Prüfung das Handy zu benutzen.", answers:["untersagt"], hint:"jemandem etwas untersagen"},
+ {sentence:"Für diese Stelle sollte man über gute EDV-Kenntnisse {b}.", answers:["verfügen"], hint:"über Kenntnisse verfügen"},
+ {sentence:"Ich bin der {b}, dass wir mehr in Bildung investieren sollten.", answers:["Ansicht"], hint:"я считаю..."}
+];
+
+const storyParts = [
+ "Es war ein regnerischer Dienstagabend, und der Flughafen München war ungewöhnlich voll. Ich saß am Gate 14 und wartete geduldig auf meinen Anschlussflug, als plötzlich eine wichtige ",
+ {b:"Durchsage", letter:"D"}, " über die Lautsprecher zu hören war. Eine ruhige Stimme erklärte, dass mein Flug wegen einer technischen ",
+ {b:"Verzögerung", letter:"V"}, " mehrere Stunden Verspätung haben würde. Ich seufzte, holte mein Handy heraus und öffnete aus Langeweile die Nachrichten-App.###Die Schlagzeile, die mir sofort ins Auge fiel, überraschte mich: Ein bekannter, ",
+ {b:"angehender", letter:"a"}, " Politiker, der seit Jahren als Hoffnungsträger seiner Partei galt, hatte offenbar eine schwierige ",
+ {b:"Entscheidung", letter:"E"}, " treffen müssen. In einer kurzen Pressekonferenz erklärte er mit ernster Stimme, dass er sich nach reiflicher Überlegung dazu entschlossen habe, sein Amt niederzulegen. Er sagte, er sei ",
+ {b:"derzeit", letter:"d"}, " einfach nicht mehr in der ",
+ {b:"Lage", letter:"L"}, ", die Verantwortung für so ein wichtiges Ressort zu tragen. Kurz darauf bestätigte er offiziell seinen ",
+ {b:"Rücktritt", letter:"R"}, ".###Die Reaktionen ließen nicht lange auf sich warten. Schon in den ersten Minuten übten zahlreiche Journalisten und politische Gegner scharfe ",
+ {b:"Kritik", letter:"K"}, " an seiner Entscheidung; manche warfen ihm vor, zu spät gehandelt zu haben, andere lobten seinen Mut. Der Politiker selbst wirkte gefasst. In einem Interview betonte er, es sei ihm wichtig, endlich ",
+ {b:"Verantwortung", letter:"V"}, " für vergangene Fehler zu übernehmen, anstatt sich weiter herauszureden.###Während ich die Zeilen las, dachte ich an ähnliche Situationen aus meinem eigenen Leben zurück. Ehrlich gesagt konnte ich seine Beweggründe gut ",
+ {b:"nachvollziehen", letter:"n"}, ", denn der öffentliche Druck auf ihn war in den vergangenen Wochen ",
+ {b:"enorm", letter:"e"}, " gewesen — kaum ein Tag verging ohne neue Schlagzeilen über sein Ressort. Als endlich der Aufruf zum Boarding kam, klappte ich mein Handy zu und dachte, dass manche Entscheidungen eben Zeit und Mut brauchen — egal ob im Flughafen-Wartesaal oder im Kanzleramt."
+];
+
+const dialogues = [
+ {
+  title:"Dialog 1 — Reiseplanung",
+  lines:[
+   {sp:"Аня", text:"Слушай, у меня есть три варианта тура на осенние каникулы, но я никак не могу выбрать.", answers:null},
+   {sp:"Вера", text:"Показывай, обсудим вместе.", answers:null},
+   {sp:"Аня", text:"Вот смотри — есть готовый маршрут от турагентства, но мне не нравится, что там всё расписано по минутам. Не хочу ехать с этим {b} туром.", answers:["pauschal"], hint:"обобщённый, без деталей"},
+   {sp:"Вера", text:"Согласна, из такого тура вообще не видно настоящей страны. Лучше поехать {b} и самим решать, куда идти и что смотреть.", answers:["auf eigene Faust"], hint:"на свой страх и риск"},
+   {sp:"Аня", text:"Тогда для начала нужно {b} — куда именно едем: в Италию или в Испанию?", answers:["eine Auswahl treffen"], hint:"сделать выбор"},
+   {sp:"Вера", text:"Хм, обе страны хороши... Давай так: ты изучишь варианты жилья, а я посмотрю билеты.", answers:null},
+   {sp:"Аня", text:"Договорились. Кстати, может, ты сегодня же {b} и забронируешь билеты, пока цены не выросли?", answers:["eine Initiative ergreifen"], hint:"проявить инициативу"},
+   {sp:"Вера", text:"Хорошо, сделаю это сегодня вечером!", answers:null}
+  ]
+ },
+ {
+  title:"Dialog 2 — Nach der Reise",
+  lines:[
+   {sp:"Марк", text:"Ну как тебе отпуск, всё понравилось?", answers:null},
+   {sp:"Оля", text:"Очень! Особенно отель — персонал там по-настоящему умеет {b} гостей: завтрак в номер каждое утро, полотенца в виде лебедей...", answers:["verwöhnen"], hint:"баловать"},
+   {sp:"Марк", text:"Звучит роскошно. А что запомнилось больше всего из экскурсий?", answers:null},
+   {sp:"Оля", text:"Точно поездка к вулкану. Увидеть его {b} — это было просто незабываемо, я весь день была под впечатлением.", answers:["hautnah"], hint:"вживую, очень близко"},
+   {sp:"Марк", text:"Здорово! Ты, кстати, купила какой-нибудь {b} с поездки?", answers:["das Andenken","Andenken"], hint:"сувенир, память"},
+   {sp:"Оля", text:"Да, магнитик и местное оливковое масло. Но знаешь, в следующий раз я хочу выбрать более {b} отель — с солнечными панелями и без пластика.", answers:["nachhaltig"], hint:"устойчивый, долговременный"},
+   {sp:"Марк", text:"Отличная идея, буду иметь в виду для нашей следующей совместной поездки.", answers:null}
+  ]
+ }
+];
+
+/* ---------- HELPERS ---------- */
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g," "); }
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* ---------- TABS ---------- */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+/* ---------- MATCHING (two-column click UI) ---------- */
+const termOrder = shuffle(vocab.map((v,i)=>i));
+const transOrder = shuffle(vocab.map((v,i)=>i));
+const termsEl = document.getElementById("match-terms");
+const transEl = document.getElementById("match-trans");
+let selectedTerm = null;
+const pairs = {}; // termIdx -> transElementIdx (position in transOrder DOM)
+let pairCounter = 0;
+
+termOrder.forEach(idx=>{
+  const div = document.createElement("div");
+  div.className = "match-item term";
+  div.textContent = vocab[idx].de;
+  div.dataset.vocabIdx = idx;
+  div.addEventListener("click", ()=>onTermClick(div, idx));
+  termsEl.appendChild(div);
+});
+transOrder.forEach(idx=>{
+  const div = document.createElement("div");
+  div.className = "match-item trans";
+  div.textContent = vocab[idx].ru;
+  div.dataset.vocabIdx = idx;
+  div.addEventListener("click", ()=>onTransClick(div, idx));
+  transEl.appendChild(div);
+});
+
+function onTermClick(el, idx){
+  // if already paired, unpair it
+  if(el.dataset.pairedWith !== undefined){
+    unpair(el);
+    return;
+  }
+  document.querySelectorAll(".match-item.term").forEach(t=>t.classList.remove("selected"));
+  if(selectedTerm === el){ selectedTerm = null; return; }
+  selectedTerm = el;
+  el.classList.add("selected");
+}
+function onTransClick(el, idx){
+  if(el.dataset.pairedWith !== undefined){
+    unpair(document.querySelector('.match-item.term[data-el-id="'+el.dataset.pairedWith+'"]'));
+    return;
+  }
+  if(!selectedTerm) return;
+  pairCounter++;
+  const id = "p"+pairCounter;
+  selectedTerm.dataset.elId = id;
+  selectedTerm.dataset.pairedWith = id;
+  el.dataset.pairedWith = id;
+  const badgeT = document.createElement("span");
+  badgeT.className = "badge"; badgeT.textContent = pairCounter;
+  selectedTerm.prepend(badgeT);
+  const badgeR = document.createElement("span");
+  badgeR.className = "badge"; badgeR.textContent = pairCounter;
+  el.prepend(badgeR);
+  selectedTerm.classList.add("paired");
+  selectedTerm.classList.remove("selected");
+  el.classList.add("paired");
+  selectedTerm = null;
+}
+function unpair(termEl){
+  if(!termEl) return;
+  const id = termEl.dataset.pairedWith;
+  const transEl2 = document.querySelector('.match-item.trans[data-paired-with="'+id+'"]');
+  termEl.classList.remove("paired","correct","wrong");
+  delete termEl.dataset.pairedWith;
+  delete termEl.dataset.elId;
+  const b1 = termEl.querySelector(".badge"); if(b1) b1.remove();
+  if(transEl2){
+    transEl2.classList.remove("paired","correct","wrong");
+    delete transEl2.dataset.pairedWith;
+    const b2 = transEl2.querySelector(".badge"); if(b2) b2.remove();
+  }
+}
+function checkMatch(){
+  let correct=0, attempted=0;
+  document.querySelectorAll(".match-item.term").forEach(termEl=>{
+    termEl.classList.remove("correct","wrong");
+    const id = termEl.dataset.pairedWith;
+    if(!id) return;
+    attempted++;
+    const transElMatch = document.querySelector('.match-item.trans[data-paired-with="'+id+'"]');
+    transElMatch.classList.remove("correct","wrong");
+    const termIdx = termEl.dataset.vocabIdx;
+    const transIdx = transElMatch.dataset.vocabIdx;
+    if(termIdx === transIdx){
+      termEl.classList.add("correct"); transElMatch.classList.add("correct"); correct++;
+    } else {
+      termEl.classList.add("wrong"); transElMatch.classList.add("wrong");
+    }
+  });
+  document.getElementById("match-score").textContent = "Richtig: " + correct + " / " + vocab.length + " (verbunden: " + attempted + ")";
+}
+
+/* ---------- FIB ---------- */
+const fibContainer = document.getElementById("fib-container");
+fibData.forEach((item,i)=>{
+  const div = document.createElement("div");
+  div.className = "sentence-block";
+  const parts = item.sentence.split("{b}");
+  const p = document.createElement("div");
+  p.className = "sentence-text";
+  p.appendChild(document.createTextNode(parts[0]));
+  const inp = document.createElement("input");
+  inp.type="text"; inp.className="blank"; inp.dataset.idx=i;
+  inp.id = "fib-"+i;
+  p.appendChild(inp);
+  p.appendChild(document.createTextNode(parts[1]));
+  div.appendChild(p);
+  const hint = document.createElement("div");
+  hint.className="hint";
+  hint.textContent = "Hinweis: " + item.hint;
+  div.appendChild(hint);
+  fibContainer.appendChild(div);
+});
+function checkFib(){
+  let correct=0;
+  fibData.forEach((item,i)=>{
+    const inp = document.getElementById("fib-"+i);
+    inp.classList.remove("correct","wrong");
+    if(item.answers.some(a=>norm(a)===norm(inp.value))){ inp.classList.add("correct"); correct++; }
+    else if(inp.value.trim()!==""){ inp.classList.add("wrong"); }
+  });
+  document.getElementById("fib-score").textContent = "Richtig: " + correct + " / " + fibData.length;
+}
+
+/* ---------- STORY ---------- */
+const storyContainer = document.getElementById("story-container");
+let storyBlankIdx = 0;
+const storyAnswers = [];
+let currentP = document.createElement("p");
+storyContainer.appendChild(currentP);
+storyParts.forEach(part=>{
+  if(typeof part === "string"){
+    const segments = part.split("###");
+    segments.forEach((seg,i)=>{
+      currentP.appendChild(document.createTextNode(seg));
+      if(i < segments.length-1){
+        currentP = document.createElement("p");
+        storyContainer.appendChild(currentP);
+      }
+    });
+  } else {
+    const inp = document.createElement("input");
+    inp.type="text"; inp.className="blank"; inp.style.width="130px";
+    inp.placeholder = part.letter + "…";
+    inp.id = "story-"+storyBlankIdx;
+    storyAnswers.push(part.b);
+    storyBlankIdx++;
+    currentP.appendChild(inp);
+  }
+});
+function checkStory(){
+  let correct=0;
+  storyAnswers.forEach((ans,i)=>{
+    const inp = document.getElementById("story-"+i);
+    inp.classList.remove("correct","wrong");
+    if(norm(ans)===norm(inp.value)){ inp.classList.add("correct"); correct++; }
+    else if(inp.value.trim()!==""){ inp.classList.add("wrong"); }
+  });
+  document.getElementById("story-score").textContent = "Richtig: " + correct + " / " + storyAnswers.length;
+}
+
+/* ---------- DIALOGUES ---------- */
+const dialogueContainer = document.getElementById("dialogue-container");
+let dlgBlankIdx = 0;
+const dlgAnswers = [];
+dialogues.forEach(dlg=>{
+  const wrap = document.createElement("div");
+  wrap.className="dialogue";
+  const h = document.createElement("h2");
+  h.style.fontSize="1.1rem";
+  h.textContent = dlg.title;
+  wrap.appendChild(h);
+  dlg.lines.forEach(line=>{
+    const p = document.createElement("p");
+    const sp = document.createElement("span");
+    sp.className="speaker"; sp.textContent = line.sp + ": ";
+    p.appendChild(sp);
+    if(!line.answers){
+      p.appendChild(document.createTextNode(line.text));
+      wrap.appendChild(p);
+      return;
+    }
+    const parts = line.text.split("{b}");
+    p.appendChild(document.createTextNode(parts[0]));
+    const inp = document.createElement("input");
+    inp.type="text"; inp.className="blank"; inp.style.width="180px";
+    inp.id = "dlg-"+dlgBlankIdx;
+    dlgAnswers.push(line.answers);
+    dlgBlankIdx++;
+    p.appendChild(inp);
+    p.appendChild(document.createTextNode(parts[1]));
+    wrap.appendChild(p);
+    const hint = document.createElement("div");
+    hint.className="hint";
+    hint.textContent = "Hinweis: " + line.hint;
+    wrap.appendChild(hint);
+  });
+  dialogueContainer.appendChild(wrap);
+});
+function checkDialogue(){
+  let correct=0;
+  dlgAnswers.forEach((answers,i)=>{
+    const inp = document.getElementById("dlg-"+i);
+    inp.classList.remove("correct","wrong");
+    if(answers.some(a=>norm(a)===norm(inp.value))){ inp.classList.add("correct"); correct++; }
+    else if(inp.value.trim()!==""){ inp.classList.add("wrong"); }
+  });
+  document.getElementById("dialogue-score").textContent = "Richtig: " + correct + " / " + dlgAnswers.length;
+}
+</script>
+</body>
+</html>
